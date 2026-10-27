@@ -1,0 +1,48 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+.wrangler/
+.output/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+*.env
+.example.env
+*.local
+
+# cloudflare / wrangler
+.dev.vars
+apps/api/.wrangler/
+
+# editor / os
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# misc
+coverage/
+*.tsbuildinfo
+
+__pycache__/
+
+# Deploy credentials (never commit)
+.deploy.env
+
+# Local D1 dumps (contain user data)
+backups/
+
+# Local-only working data
+.video-data/
+.claude/projects/
+
+# Private deploy configs with real resource IDs (see scripts/deploy-prod.sh WRANGLER_CONFIG)
+apps/api/wrangler.*.local.toml
+
+# Local archive of removed code (see _archive/README.md)
+_archive/

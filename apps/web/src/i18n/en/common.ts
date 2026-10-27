@@ -1,0 +1,30 @@
+import type vi from "../vi/common";
+
+const en: Record<keyof typeof vi, string> = {
+  save: "Save",
+  saving: "Saving…",
+  cancel: "Cancel",
+  delete: "Delete",
+  edit: "Edit",
+  add: "Add",
+  addRow: "Add row",
+  close: "Close",
+  back: "Back",
+  confirm: "Confirm",
+  loading: "Loading…",
+  search: "Search",
+  noMatch: "No matches.",
+  optional: "optional",
+  all: "All",
+  account: "Account",
+  settings: "Settings",
+  logout: "Sign out",
+  language: "Language",
+  saved: "Saved",
+  saveFailed: "Could not save",
+  deleted: "Deleted",
+  invalidJson: "Invalid JSON",
+  teacherBadge: "Teacher",
+  teacher: "Teacher",
+};
+export default en;

@@ -1,0 +1,32 @@
+import type vi from "../vi/teacherTexts";
+
+const en: Record<keyof typeof vi, string> = {
+  "page.title": "Interface text",
+  "page.subtitle": "Reword the app the way you like. Later updates never overwrite what you change here.",
+  "filter.search": "Search by visible text or key",
+  "filter.onlyEdited": "Only edited",
+  "filter.onlyStale": "Only needs review",
+  "filter.all": "All texts",
+  "filter.allGroups": "All groups",
+  "filter.editing": "Editing",
+  "stats.total": "{n} text|{n} texts",
+  "stats.edited": "{n} edited",
+  "stats.stale": "{n} need review",
+  "col.builtIn": "Default",
+  "col.yours": "Yours",
+  "col.key": "Key",
+  "badge.edited": "Edited",
+  "badge.stale": "Default changed",
+  "staleHint": "An update changed the default to: “{base}”. Check that your version still fits.",
+  "action.edit": "Edit",
+  "action.reset": "Reset to default",
+  "action.keep": "Keep mine",
+  "placeholder.override": "Leave empty to use the default",
+  "toast.saved": "Saved — reload the page to see it",
+  "toast.reset": "Back to the default text",
+  "hint.placeholders": "Keep the {…} parts as they are — the app fills them in (numbers, names…).",
+  "hint.reload": "Reload page",
+  "showMore": "Show {n} more",
+  "empty": "No text matches.",
+};
+export default en;

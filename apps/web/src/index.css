@@ -1,0 +1,273 @@
+@import "tailwindcss";
+
+/* Tailwind v4: dark mode theo class */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Font PHIÊN ÂM IPA: "Charis IPA" là bản Charis SIL SUBSET (Latin+IPA+Greek, ~63KB/weight)
+     BUNDLE kèm app (dưới) → mọi máy render GIỐNG NHAU, phủ trọn ɪ ʊ ə ɜ ɚ ɹ ŋ ʒ θ ˈ ˌ.
+     Sau đó mới fallback font hệ thống. KHÔNG dùng monospace (Consolas/Courier thiếu glyph → tofu). */
+  --font-ipa: "Charis IPA", "Charis SIL", "Doulos SIL", "Gentium Plus", "Segoe UI", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* BO GÓC THỐNG NHẤT = 8px toàn web. Trước đây mỗi nơi một kiểu (rounded-xl/2xl/3xl 12–24px);
+     nay mọi rounded-md…3xl đều 8px. Giữ nguyên `sm`/`xs` (badge nhỏ) và `full` (pill/avatar/toggle). */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.5rem;
+  --radius-3xl: 0.5rem;
+}
+
+/* Charis SIL (SIL OFL) subset cho IPA — self-host, chỉ tải khi trang có phần tử .font-ipa.
+   KHÔNG đặt unicode-range hẹp: để CẢ chuỗi IPA (kể cả / và chữ latin) cùng 1 font, không lệch. */
+@font-face {
+  font-family: "Charis IPA";
+  src: url("./assets/fonts/charis-ipa-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Charis IPA";
+  src: url("./assets/fonts/charis-ipa-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  /* Nền GIỐNG body → dải scrollbar-gutter (thuộc html, ngoài body) KHÔNG lộ màu mặc định sáng
+     bên phải header/nav (nếu không, dark mode thấy vệt sáng cạnh scrollbar). */
+  @apply bg-slate-100 dark:bg-slate-950;
+  /* clip (không phải hidden) để chặn tràn ngang mà KHÔNG tạo scroll-container → header sticky vẫn dính. */
+  overflow-x: clip;
+  /* Tắt scroll-anchoring: khi panel bài đọc/bài học tự thu gọn lúc dính top, trình duyệt
+     KHÔNG bù trừ scrollY → không giật lên/xuống ở đoạn bài đọc. */
+  overflow-anchor: none;
+}
+
+/* Shell khung cố định (UserLayout…): header tràn viền, scroll nằm TRONG <main> (scrollbar dưới header).
+   Tắt gutter dành sẵn của html + chặn window scroll để không hở dải màu cạnh phải header. */
+html.shell-fixed {
+  scrollbar-gutter: auto;
+  overflow: hidden;
+}
+html.shell-fixed body,
+html.shell-fixed #root {
+  /* Not 100dvh: the shell itself is `position: fixed`, so these only need to stop being a second
+     scroll surface. `min-height` from the base rules would otherwise keep a phantom 100vh box. */
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* The fixed-height shell is anchored with inset instead of a viewport UNIT. On mobile a `dvh`
+   height can stay at the URL-bar-visible value after a Back navigation — nothing resizes, so it is
+   never recomputed — and the page background shows through as a band under the shell. `inset: 0`
+   has no such stale value: it always follows the viewport the browser is actually painting. */
+.app-shell {
+  position: fixed;
+  inset: 0;
+}
+
+/* A page with a fixed bottom action bar keeps the footer clear of it. */
+[data-scroll-root]:has(.fixed.bottom-0) .app-footer {
+  padding-bottom: 4.5rem;
+}
+
+/* Printing wants the document back: no fixed shell, no inner scroller, everything in flow. */
+@media print {
+  html.shell-fixed,
+  html.shell-fixed body,
+  html.shell-fixed #root {
+    height: auto;
+    overflow: visible;
+  }
+  .app-shell {
+    position: static;
+  }
+  .app-shell > main {
+    overflow: visible;
+  }
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-sans);
+  @apply bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 m-0;
+  min-height: 100vh;
+  overflow-x: clip;
+  width: 100%;
+  max-width: 100vw;
+}
+
+#root {
+  @apply min-h-screen;
+}
+
+/* Recharts: bỏ viền focus xanh khi click vào biểu đồ */
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus,
+.recharts-surface:focus,
+.recharts-surface {
+  outline: none !important;
+}
+
+/* Hiệu ứng "rực lửa" cho vòng chuỗi ngày học (streak) */
+@keyframes flame-flicker {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.14) rotate(3deg);
+    opacity: 0.85;
+  }
+}
+.animate-flame {
+  animation: flame-flicker 1.4s ease-in-out infinite;
+}
+
+/* Huy hiệu cấp độ (LevelMedal): quầng sáng thở nhẹ + vệt sáng quét ngang. */
+@keyframes medal-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.08);
+  }
+}
+.animate-medal-glow {
+  animation: medal-glow 2.8s ease-in-out infinite;
+}
+@keyframes medal-shine {
+  0% {
+    transform: translateX(-160%) skewX(-20deg);
+  }
+  /* Quét 1 lần rồi nghỉ dài cho tinh tế, không chớp liên tục. */
+  22%,
+  100% {
+    transform: translateX(260%) skewX(-20deg);
+  }
+}
+.animate-medal-shine {
+  animation: medal-shine 4.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-medal-glow,
+  .animate-medal-shine {
+    animation: none;
+  }
+}
+
+/* Focus & selection — cyan primary.
+   Ring bàn phím cho nút/link; ô nhập văn bản tự tô viền focus (focus:border)
+   + có con trỏ nhấp nháy nên KHÔNG dùng khung outline (tránh viền vuông xấu). */
+:focus-visible {
+  outline: 2px solid rgb(6 182 212);
+  outline-offset: 2px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[contenteditable]:focus-visible {
+  outline: none;
+}
+::selection {
+  background-color: rgb(6 182 212 / 0.2);
+  color: rgb(8 145 178);
+}
+
+/* Ẩn hẳn scrollbar nhưng vẫn kéo/cuộn được (dùng cho dải số câu hỏi). */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-thin { scrollbar-width: thin; scrollbar-color: rgb(148 163 184 / 0.4) transparent; }
+
+/* Scrollbar mảnh — CHỈ cho thiết bị trỏ chính xác (chuột/trackpad).
+   ⚠️ Đụng vào ::-webkit-scrollbar trên CẢM ỨNG sẽ thay thanh cuộn overlay tự-ẩn của OS
+   bằng thanh cổ điển: chiếm chỗ thật (gutter phải lệch so với trái), chạy suốt từ đỉnh
+   vùng cuộn (đè lên hero/header) và phải CHẠM-GIỮ-KÉO mới cuộn được — trong khi trên
+   mobile/iPad người dùng chỉ vuốt. Để cảm ứng dùng scrollbar mặc định của hệ điều hành. */
+@media (pointer: fine) {
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgb(148 163 184 / 0.35); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(148 163 184 / 0.55); }
+  .dark ::-webkit-scrollbar-thumb { background: rgb(71 85 105 / 0.45); }
+
+  /* Scrollbar siêu mảnh (3px) — dùng cho vùng cuộn trong modal */
+  .scrollbar-thin::-webkit-scrollbar { width: 3px; height: 3px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(148 163 184 / 0.4); border-radius: 9999px; }
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(71 85 105 / 0.5); }
+}
+
+button, a, [role="button"], label[for], select { cursor: pointer; }
+
+/* Nền gradient nhẹ cho màn đăng nhập / cổng học sinh */
+.hero-bg {
+  background:
+    radial-gradient(55rem 40rem at 100% -10%, rgb(6 182 212 / 0.12), transparent 60%),
+    radial-gradient(45rem 40rem at -10% 110%, rgb(6 182 212 / 0.10), transparent 60%);
+}
+
+/* Animations */
+@keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.animate-fade-in { animation: fade-in 0.25s ease-out; }
+
+/* Home page: the hero's floating cards drift gently; still under prefers-reduced-motion. */
+@keyframes home-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.home-float { animation: home-float 6s ease-in-out infinite; }
+.home-float-slow { animation: home-float 8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .home-float, .home-float-slow { animation: none; } }
+
+/* Breaking-news ticker: the track holds the quote list TWICE, so shifting it by half its width
+   loops seamlessly. Duration is set inline from the measured width to keep a constant speed.
+   Scrolling IS the feature, so it keeps running under prefers-reduced-motion; hover pauses it. */
+@keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker-track { animation-name: ticker-scroll; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform; }
+.ticker-track:hover { animation-play-state: paused; }
+
+@media print {
+  .no-print { display: none !important; }
+}
+
+/* Range slider mượt (dùng qua component ui/Slider). Phần đã chọn tô cyan qua biến --slider-fill
+   đặt inline theo %, phần còn lại xám nhạt hợp cả sáng/tối. Thumb tròn viền cyan. */
+.msyen-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 1.25rem; background: transparent; cursor: pointer; }
+.msyen-slider:focus { outline: none; }
+.msyen-slider::-webkit-slider-runnable-track { height: 0.5rem; border-radius: 9999px; background: var(--slider-fill, rgb(148 163 184 / 0.35)); }
+.msyen-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -0.3125rem; height: 1.125rem; width: 1.125rem; border-radius: 9999px; background: #fff; border: 2px solid #06b6d4; box-shadow: 0 1px 3px rgb(0 0 0 / 0.25); transition: transform .1s ease; }
+.msyen-slider:active::-webkit-slider-thumb { transform: scale(1.15); }
+.msyen-slider::-moz-range-track { height: 0.5rem; border-radius: 9999px; background: rgb(148 163 184 / 0.35); }
+.msyen-slider::-moz-range-progress { height: 0.5rem; border-radius: 9999px; background: #06b6d4; }
+.msyen-slider::-moz-range-thumb { height: 1.125rem; width: 1.125rem; border-radius: 9999px; background: #fff; border: 2px solid #06b6d4; box-shadow: 0 1px 3px rgb(0 0 0 / 0.25); }
+.dark .msyen-slider::-webkit-slider-thumb { background: #0f172a; }
+.dark .msyen-slider::-moz-range-thumb { background: #0f172a; }
+
+/* Lật thẻ từ vựng sang mặt luyện phát âm. Quay quanh trục Y nửa vòng rồi hiện nội dung mới —
+   thẻ đổi chiều cao theo nội dung nên KHÔNG dựng khối 3D hai mặt (lưới sẽ giật mỗi lần lật). */
+@keyframes flip-in {
+  from { opacity: 0; transform: perspective(800px) rotateY(-90deg); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Reading aloud with the mic live: the practice page's own light/dark button steps aside for the
+   one the reader draws inside the running text (see ReadingPractice). */
+html[data-recording="1"] .page-theme-toggle {
+  display: none;
+}

@@ -1,0 +1,115 @@
+name = "english-homework"
+main = "src/index.ts"
+compatibility_date = "2024-12-05"
+compatibility_flags = ["nodejs_compat"]
+
+# ---- Static assets: the built SPA, served same-origin with /api ----
+# Build the web app first (pnpm build:web), then wrangler deploy.
+[assets]
+directory = "../web/dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# ---- D1 — create with: wrangler d1 create english_homework, then paste the id ----
+[[d1_databases]]
+binding = "DB"
+database_name = "english_homework"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# ---- R2 (audio, images) — create with: wrangler r2 bucket create english-homework ----
+[[r2_buckets]]
+binding = "AUDIO"
+bucket_name = "english-homework"
+
+# ---- Custom domain (optional). Without it the Worker runs on <name>.<account>.workers.dev ----
+# [[routes]]
+# pattern = "homework.example.com"
+# custom_domain = true
+
+# ---- Hourly cron; scheduled() decides what is due from the settings saved in the app ----
+[triggers]
+crons = ["0 * * * *"]
+
+# ---- Queues — create each with: wrangler queues create <name> ----
+# AI_QUEUE: teacher-side AI jobs (generate exercises, TTS, grammar tagging).
+[[queues.producers]]
+binding = "AI_QUEUE"
+queue = "english-homework-ai-jobs"
+
+[[queues.consumers]]
+queue = "english-homework-ai-jobs"
+max_batch_size = 1
+max_batch_timeout = 5
+max_retries = 2
+max_concurrency = 12
+
+# INTERACTIVE_QUEUE: learner grading (read-aloud, writing, quiz comments). Separate concurrency so
+# a learner never waits behind a long teacher job.
+[[queues.producers]]
+binding = "INTERACTIVE_QUEUE"
+queue = "english-homework-interactive-jobs"
+
+[[queues.consumers]]
+queue = "english-homework-interactive-jobs"
+max_batch_size = 1
+max_batch_timeout = 5
+max_retries = 2
+max_concurrency = 6
+
+# CONTENT_QUEUE: content enrichment (IPA + sentence translation for passages).
+[[queues.producers]]
+binding = "CONTENT_QUEUE"
+queue = "english-homework-content-jobs"
+
+[[queues.consumers]]
+queue = "english-homework-content-jobs"
+max_batch_size = 1
+max_batch_timeout = 5
+max_retries = 2
+max_concurrency = 4
+
+# ---- Rate limiting (Workers binding), per minute. period accepts only 10 or 60. ----
+[[ratelimits]]
+name = "RL_DATA"
+namespace_id = "1001"
+simple = { limit = 30, period = 60 }
+
+[[ratelimits]]
+name = "RL_SPEAK"
+namespace_id = "1002"
+simple = { limit = 20, period = 60 }
+
+[[ratelimits]]
+name = "RL_AUTH"
+namespace_id = "1003"
+simple = { limit = 10, period = 60 }
+
+[[ratelimits]]
+name = "RL_AI"
+namespace_id = "1004"
+simple = { limit = 5, period = 60 }
+
+# ---- Abuse telemetry (optional): one data point per rate-limited request. See lib/telemetry.ts. ----
+[[analytics_engine_datasets]]
+binding = "ABUSE_AE"
+dataset = "english_homework_abuse"
+
+[vars]
+# Allowed CORS origins when web and API run on different origins (dev). Production is same-origin.
+ALLOWED_ORIGINS = "http://localhost:5173"
+# Public URL of the app, used to build absolute links. Set it to your domain.
+PUBLIC_BASE_URL = "http://localhost:8787"
+# "off" disables the hourly cron that regenerates missing exercise audio.
+MEDIA_BACKFILL = "on"
+# Sender for password-reset email (domain verified at Resend). Key = secret RESEND_API_KEY.
+EMAIL_FROM = "Homework <no-reply@example.com>"
+
+# ---- Secrets (never here) — set with: wrangler secret put <NAME> (local: apps/api/.dev.vars) ----
+# JWT_SECRET            signs login tokens (required)
+# GEMINI_API_KEYS       comma-separated; also OPENAI_ / DEEPSEEK_ / ANTHROPIC_ / XAI_ / OPENROUTER_API_KEYS
+# AZURE_SPEECH_KEY      + AZURE_SPEECH_REGION (e.g. southeastasia): TTS + pronunciation scoring
+# CRON_SECRET           protects /api/v1/cron/*
+# RESEND_API_KEY        password-reset email (unset → email disabled)
+# GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REDIRECT_URI   Google sign-in (optional)
+# PEXELS_API_KEY / PIXABAY_API_KEY   image search in the editor (optional)

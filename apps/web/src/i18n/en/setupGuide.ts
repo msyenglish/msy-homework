@@ -1,0 +1,31 @@
+import type vi from "../vi/setupGuide";
+
+const en: Record<keyof typeof vi, string> = {
+  "page.title": "Install it yourself",
+  "page.subtitle": "From an empty Cloudflare account to a running app — one command, a few minutes.",
+  "page.vietnameseOnly": "This guide is in Vietnamese for now.",
+  "nav.home": "Home",
+  "nav.teacherLogin": "Teacher sign-in",
+  "nav.github": "Source code",
+  "home.footerLink": "Install it yourself",
+  "ai.copy": "Copy for an AI assistant",
+  "ai.copied": "Copied — paste into ChatGPT, Claude, Gemini…",
+  "ai.copiedShort": "Copied",
+  "ai.hint": "Copies the whole guide with instructions, for an AI assistant to walk you through it.",
+  "toc.title": "On this page",
+  "builder.title": "Build your install command",
+  "builder.subtitle": "Paste your token and the command below fills itself in — then Copy and paste it into a terminal.",
+  "builder.os.unix": "macOS / Linux",
+  "builder.os.windows": "Windows",
+  "builder.token": "Cloudflare token",
+  "builder.tokenPlaceholder": "cfat_… (step 3)",
+  "builder.key": "API_DEPLOY",
+  "builder.keyPlaceholder": "One long line from the project owner",
+  "builder.keyHint": "Only needed while the source code is private.",
+  "builder.domain": "Own domain (optional)",
+  "builder.domainPlaceholder": "hoc.truongcuaban.com — empty = the workers.dev address",
+  "builder.privacy": "What you type here stays in this browser; nothing is sent anywhere.",
+  "builder.run.unix": "Open Terminal (macOS: Launchpad → Terminal), paste the command, press Enter.",
+  "builder.run.windows": "Open PowerShell (Start, type PowerShell), paste the command, press Enter.",
+};
+export default en;

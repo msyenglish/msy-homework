@@ -1,0 +1,34 @@
+# Local secrets for `wrangler dev`. Copy to .dev.vars (gitignored) and fill in.
+
+# Required: signs login cookies. Any long random string, e.g. `openssl rand -base64 32`.
+JWT_SECRET=change-me
+
+# AI keys: simplest is to paste them on /teacher/ai (Key tab) — stored encrypted in D1.
+# Optional: a separate secret for that encryption (defaults to JWT_SECRET).
+# KEY_ENCRYPTION_SECRET=
+# Advanced: keys as env vars (comma-separated keys rotate automatically).
+GEMINI_API_KEYS=
+# OPENAI_API_KEYS=
+# ANTHROPIC_API_KEYS=
+# DEEPSEEK_API_KEYS=
+# XAI_API_KEYS=
+# OPENROUTER_API_KEYS=
+# GEMINI_BASE_URL=   # optional proxy when Gemini is geo-blocked from your region
+
+# Optional: Deepgram Flux voices (or paste the key on /teacher/ai → Key tab).
+# DEEPGRAM_API_KEYS=
+# Optional: Azure Speech (TTS + pronunciation scoring).
+AZURE_SPEECH_KEY=
+AZURE_SPEECH_REGION=southeastasia
+
+# Optional extras.
+# RESEND_API_KEY=
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=
+# GOOGLE_REDIRECT_URI=http://localhost:5173/api/v1/account/oauth/google/callback
+# PEXELS_API_KEY=
+# PIXABAY_API_KEY=
+# CRON_SECRET=
+
+# Local only: shows one-click teacher/learner sign-in buttons on the login pages (localhost only).
+# DEV_QUICK_LOGIN=1

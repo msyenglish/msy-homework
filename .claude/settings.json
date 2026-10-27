@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/check-comment-language.mjs\"",
+            "timeout": 10,
+            "statusMessage": "Checking comment language"
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/check-ui-i18n.mjs\"",
+            "timeout": 10,
+            "statusMessage": "Checking UI text i18n"
+          }
+        ]
+      }
+    ]
+  }
+}

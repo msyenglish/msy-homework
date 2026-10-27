@@ -1,0 +1,35 @@
+{
+  "name": "english-homework",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Nền tảng giao & luyện bài tập tiếng Anh cho giáo viên (Cloudflare Workers + D1 + R2)",
+  "type": "module",
+  "packageManager": "pnpm@9.12.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter ./apps/* dev",
+    "oss": "node scripts/oss.mjs",
+    "dev:web":"pnpm --filter @msyen/web dev",
+    "dev:api": "pnpm --filter @msyen/api dev",
+    "build": "pnpm --filter @msyen/web build",
+    "build:web": "pnpm --filter @msyen/web build",
+    "deploy:prod": "bash scripts/deploy-prod.sh",
+    "cf:setup": "node scripts/cloudflare-setup.mjs",
+    "cf:update": "node scripts/cloudflare-update.mjs",
+    "cf:reset-password": "node scripts/cloudflare-reset-password.mjs",
+    "cf:backup": "node scripts/cloudflare-backup.mjs",
+    "cf:google": "node scripts/cloudflare-google.mjs",
+    "cf:demo": "node scripts/cloudflare-demo.mjs",
+    "db:generate": "pnpm --filter @msyen/api db:generate",
+    "db:migrate:local": "pnpm --filter @msyen/api db:migrate:local",
+    "db:migrate:remote": "pnpm --filter @msyen/api db:migrate:remote",
+    "db:seed": "pnpm --filter @msyen/api db:seed",
+    "typecheck": "pnpm -r typecheck",
+    "learner:demo": "pnpm --filter @msyen/api learner:demo",
+    "video:transcribe": "node scripts/video-transcribe.mjs",
+    "teacher:create": "pnpm --filter @msyen/api teacher:create"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "PolyForm-Noncommercial-1.0.0"
+}
