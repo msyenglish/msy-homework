@@ -1,8 +1,9 @@
 // Renders the teacher guide's Markdown (docs/guide/*.md) as React elements — no raw HTML is injected.
-// Covers what the guide uses: headings, paragraphs, lists, tables, blockquotes, code fences, images,
-// links, **bold**, *italic* and `code`.
+// Covers what the guide uses: headings, paragraphs, lists, tables, blockquotes (incl. GitHub alerts
+// `> [!NOTE]`), `<details>` blocks, code fences, images, links, **bold**, *italic* and `code`.
 import { Fragment, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { ChevronRight, Info, Lightbulb, OctagonAlert, TriangleAlert, type LucideIcon } from "lucide-react";
 import { CodeBlock } from "./CodeBlock";
 import { cn } from "../../lib/utils";
 
@@ -87,6 +88,15 @@ function GuideImage({ src, alt, onOpen }: { src: string; alt: string; onOpen?: (
   );
 }
 
+/** GitHub alert kinds (`> [!WARNING]`) → icon and colours. */
+const ALERTS: Record<string, { Icon: LucideIcon; box: string; icon: string }> = {
+  NOTE: { Icon: Info, box: "border-cyan-400 bg-cyan-50/70 dark:bg-cyan-500/10", icon: "text-cyan-600 dark:text-cyan-300" },
+  TIP: { Icon: Lightbulb, box: "border-emerald-400 bg-emerald-50/70 dark:bg-emerald-500/10", icon: "text-emerald-600 dark:text-emerald-300" },
+  IMPORTANT: { Icon: Info, box: "border-violet-400 bg-violet-50/70 dark:bg-violet-500/10", icon: "text-violet-600 dark:text-violet-300" },
+  WARNING: { Icon: TriangleAlert, box: "border-amber-400 bg-amber-50/80 dark:bg-amber-500/10", icon: "text-amber-600 dark:text-amber-300" },
+  CAUTION: { Icon: OctagonAlert, box: "border-rose-400 bg-rose-50/70 dark:bg-rose-500/10", icon: "text-rose-600 dark:text-rose-300" },
+};
+
 const cells = (row: string) =>
   row
     .trim()
@@ -170,14 +180,54 @@ export function Markdown(p: MarkdownProps) {
       );
       continue;
     }
-    // Blockquote
+    // Collapsible block: <details>, <summary>…</summary>, Markdown body, </details>
+    if (line.trim() === "<details>") {
+      const body: string[] = [];
+      let summary = "";
+      i++;
+      while (i < lines.length && lines[i].trim() !== "</details>") {
+        const sm = lines[i].trim().match(/^<summary>(.*)<\/summary>$/);
+        if (sm && !summary) summary = sm[1];
+        else body.push(lines[i]);
+        i++;
+      }
+      i++;
+      out.push(
+        <details key={k} className="group my-4 rounded-xl border border-slate-200 bg-slate-50/60 dark:border-slate-700 dark:bg-slate-800/30">
+          <summary className="flex cursor-pointer list-none items-center gap-2 rounded-xl px-4 py-3 font-semibold text-slate-800 hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-slate-800 [&::-webkit-details-marker]:hidden">
+            <ChevronRight className="size-4 shrink-0 text-slate-400 transition group-open:rotate-90" />
+            {inline(summary, p, `${k}s`)}
+          </summary>
+          <div className="border-t border-slate-200 px-4 pb-2 dark:border-slate-700 [&>:first-child]:mt-3">
+            <Markdown {...p} source={body.join("\n")} />
+          </div>
+        </details>,
+      );
+      continue;
+    }
+    // Blockquote; a "[!KIND]" first line makes it a GitHub alert. A bare ">" line separates paragraphs.
     if (line.startsWith(">")) {
       const body: string[] = [];
       while (i < lines.length && lines[i].startsWith(">")) body.push(lines[i++].replace(/^>\s?/, ""));
+      const alert = ALERTS[body[0]?.trim().match(/^\[!(\w+)\]$/)?.[1] ?? ""];
+      if (alert) body.shift();
+      const paras = body.join("\n").split(/\n\s*\n/).map((s) => s.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
+      const content = paras.map((para, j) => (
+        <p key={j} className={j ? "mt-2" : ""}>
+          {inline(para, p, `${k}q${j}`)}
+        </p>
+      ));
       out.push(
-        <blockquote key={k} className="my-4 rounded-r-xl border-l-4 border-cyan-400 bg-cyan-50/70 px-4 py-3 text-sm text-slate-700 dark:bg-cyan-500/10 dark:text-slate-200">
-          {inline(body.join(" "), p, k)}
-        </blockquote>,
+        alert ? (
+          <div key={k} className={cn("my-4 flex gap-3 rounded-r-xl border-l-4 px-4 py-3 text-sm leading-relaxed text-slate-700 dark:text-slate-200", alert.box)}>
+            <alert.Icon className={cn("mt-0.5 size-4 shrink-0", alert.icon)} />
+            <div className="min-w-0">{content}</div>
+          </div>
+        ) : (
+          <blockquote key={k} className="my-4 rounded-r-xl border-l-4 border-cyan-400 bg-cyan-50/70 px-4 py-3 text-sm text-slate-700 dark:bg-cyan-500/10 dark:text-slate-200">
+            {content}
+          </blockquote>
+        ),
       );
       continue;
     }
@@ -212,7 +262,7 @@ export function Markdown(p: MarkdownProps) {
     }
     // Paragraph: consecutive plain lines
     const para: string[] = [];
-    while (i < lines.length && lines[i].trim() && !/^(#{1,4}\s|```|>|\||!\[)/.test(lines[i]) && !listItem.test(lines[i])) para.push(lines[i++].trim());
+    while (i < lines.length && lines[i].trim() && !/^(#{1,4}\s|```|>|\||!\[|<details>)/.test(lines[i]) && !listItem.test(lines[i])) para.push(lines[i++].trim());
     // A line no block rule claimed (e.g. a lone "|") still advances, or the loop would never end.
     if (!para.length) para.push(lines[i++].trim());
     out.push(

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, ChevronDown, ImageUp, House, KeyRound, Layers, Loader2, Mail, Palette, PanelBottom, Save, Send, Settings, Sparkles, Type, UserRound, Wand2, X, type LucideIcon } from "lucide-react";
+import { Check, ChevronDown, ExternalLink, ImageUp, House, Server, KeyRound, Layers, Loader2, Mail, Palette, PanelBottom, Save, Send, Settings, Sparkles, Type, UserRound, Wand2, X, type LucideIcon } from "lucide-react";
 import { DEFAULT_BRAND, FOOTER_LINK_KEYS, UI_LANGS, type Brand, type FooterLinks, type TeacherTitle, type UiLang } from "@msyen/shared";
 import { LANG_LABEL, t, type TKey } from "../i18n";
 import { auth, settingsApi, uploadImage } from "../lib/api";
@@ -10,6 +10,7 @@ import Drawer from "./Drawer";
 import { Button, Input, Select, Textarea } from "./ui";
 import { ToggleRow } from "./ui/toggle";
 import { cn } from "../lib/utils";
+import { fmtAgo, fmtDay } from "../lib/format";
 
 type SettingsTab = "brand" | "telegram" | "account";
 const TABS: { key: SettingsTab; icon: LucideIcon; label: TKey }[] = [
@@ -350,6 +351,7 @@ export default function SettingsDrawer({ open, onClose }: { open: boolean; onClo
             checked={notifyFb}
             onChange={setNotifyFb}
           />
+          <InstallsCard open={open} />
         </div>
       )}
 
@@ -451,5 +453,50 @@ function LogoField({ label, value, dark, emptyLabel, onChange }: { label: string
         )}
       </div>
     </div>
+  );
+}
+
+/** Install count — only the project site collects it, so the card stays hidden everywhere else. */
+function InstallsCard({ open }: { open: boolean }) {
+  const { data } = useQuery({ queryKey: ["settings", "installs"], queryFn: settingsApi.installs, enabled: open });
+  if (!data?.hub) return null;
+  return (
+    <section className="space-y-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+      <div className="flex items-start gap-2">
+        <Server className="mt-0.5 size-4 shrink-0 text-cyan-600 dark:text-cyan-400" />
+        <div className="min-w-0">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t("teacherDrawers.settings.installsTitle")}</h3>
+          <p className="text-xs text-slate-500">{t("teacherDrawers.settings.installsDesc")}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {[
+          ["teacherDrawers.settings.installsTotal", data.total],
+          ["teacherDrawers.settings.installsActive", data.active7],
+        ].map(([label, n]) => (
+          <div key={label} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
+            <p className="text-xs text-slate-500">{t(label as TKey)}</p>
+            <p className="text-xl font-extrabold text-slate-900 tabular-nums dark:text-white">{n}</p>
+          </div>
+        ))}
+      </div>
+      {data.items.length ? (
+        <ul className="max-h-72 divide-y divide-slate-100 overflow-y-auto text-sm dark:divide-slate-800">
+          {data.items.map((it) => (
+            <li key={it.url} className="py-2">
+              <a href={it.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 font-medium break-all text-cyan-700 hover:underline dark:text-cyan-300">
+                {it.url.replace(/^https:\/\//, "")} <ExternalLink className="size-3 shrink-0" />
+              </a>
+              <p className="text-xs text-slate-500">
+                {t("teacherDrawers.settings.installsSeen", { first: fmtDay(it.firstSeenAt), last: fmtAgo(it.lastSeenAt) })}
+                {it.version && <span className="ml-1 font-mono">· {it.version}</span>}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-slate-500">{t("teacherDrawers.settings.installsEmpty")}</p>
+      )}
+    </section>
   );
 }

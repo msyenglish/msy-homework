@@ -487,7 +487,24 @@ export interface AppSettingsView {
   telegram_bot_token_hint: string;
   brand: Brand;
 }
+export interface InstallRow {
+  url: string;
+  version: string;
+  lastEvent: "install" | "update" | "daily";
+  pings: number;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  lastUpdateAt: string | null;
+}
+export interface InstallStats {
+  hub: boolean;
+  total: number;
+  active7: number;
+  items: InstallRow[];
+}
+
 export const settingsApi = {
+  installs: () => req<InstallStats>("/teacher/installs"),
   get: () => req<AppSettingsView>("/teacher/settings"),
   update: (patch: Partial<{ telegram_bot_token: string; telegram_chat_id: string; telegram_enabled: boolean; telegram_feedback_notify: boolean; brand: Partial<Brand> }>) =>
     put("/teacher/settings", patch),

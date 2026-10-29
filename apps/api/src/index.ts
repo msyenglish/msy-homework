@@ -36,6 +36,7 @@ import aiAdminRoutes from "./routes/aiAdmin"; // Cổng AI: điều phối provi
 import genTemplatesRoutes from "./routes/genTemplates";
 import settingsRoutes from "./routes/settings";
 import cronRoutes from "./routes/cron";
+import { installPing, installsAdmin } from "./routes/installs";
 import publicReportRoutes from "./routes/publicReport";
 import { audioServe, audioUpload } from "./routes/audio";
 import { mediaRoutes } from "./routes/media";
@@ -48,6 +49,7 @@ import { processQuizFeedbackJob } from "./lib/quizFeedback";
 import { tagExerciseGrammar } from "./lib/grammarTag";
 import { autoExerciseAudio } from "./lib/ttsJob";
 import { getDb } from "./db";
+import { dailyInstallPing } from "./lib/installPing";
 import { enqueueContentIpa, generatePassageIpa, pickReadingNeedingIpa } from "./lib/contentBackfill";
 import { enqueueExerciseAudio, pickExercisesNeedingAudio } from "./lib/audioBackfill";
 import { applyAllDueEmailChanges } from "./lib/emailChange";
@@ -89,6 +91,7 @@ api.route("/account/oauth", accountOauthRoutes); // Google OAuth
 api.route("/dev", devLoginRoutes); // one-click sign-in, 404 unless DEV_QUICK_LOGIN=1 on localhost
 api.route("/media", audioServe); // phát tài nguyên R2 (URL mới, sạch): /api/v1/media/<key>
 api.route("/audio", audioServe); // ALIAS cũ — URL/key đã lưu trong DB vẫn phát được
+api.route("/installs", installPing); // install count, answered only on the project site
 api.route("/cron", cronRoutes); // guard bằng CRON_SECRET (curl được từ server ngoài)
 api.route("/public", publicReportRoutes); // báo cáo lượt nộp — link công khai cho phụ huynh
 api.route("/", publicRoutes);
@@ -124,6 +127,7 @@ teacher.route("/ai", aiAdminRoutes); // /ai/config · /ai/keys · /ai/usage (kh�
 teacher.route("/gen-templates", genTemplatesRoutes);
 teacher.route("/settings", settingsRoutes);
 teacher.route("/ui-texts", uiTextsRoutes);
+teacher.route("/installs", installsAdmin);
 teacher.route("/audio", audioUpload);
 teacher.route("/media", mediaRoutes); // tìm ảnh online (Pexels/Pixabay) + nhập vào R2
 api.route("/teacher", teacher);
@@ -207,6 +211,8 @@ async function scheduled(_event: ScheduledController, env: Bindings, ctx: Execut
       }
     })(),
   );
+  // Daily install ping to the project site (TELEMETRY = "off" skips it).
+  ctx.waitUntil(dailyInstallPing(env).catch((e) => console.error("Cron install ping lỗi:", e)));
   // Self-heal AUDIO for listening/mixed exercises still missing audio_url → AI_QUEUE tts.
   ctx.waitUntil(
     (async () => {

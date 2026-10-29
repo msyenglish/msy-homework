@@ -1,7 +1,7 @@
 {
   "name": "english-homework",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.01",
   "description": "Nền tảng giao & luyện bài tập tiếng Anh cho giáo viên (Cloudflare Workers + D1 + R2)",
   "type": "module",
   "packageManager": "pnpm@9.12.0",

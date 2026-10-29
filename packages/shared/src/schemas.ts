@@ -1163,3 +1163,17 @@ export const teacherEmailChangeSchema = z.object({
   email: z.string().trim().toLowerCase().email("Email không hợp lệ").max(160),
 });
 export type TeacherEmailChangeInput = z.infer<typeof teacherEmailChangeSchema>;
+
+// Install ping sent to the project site by cf:setup (install), cf:update (update) and the daily cron.
+export const INSTALL_EVENTS = ["install", "update", "daily"] as const;
+export const installPingSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .url()
+    .max(200)
+    .refine((u) => /^https:\/\//.test(u) && !/\/\/(localhost|127\.|0\.0\.0\.0)/.test(u), "URL không hợp lệ"),
+  event: z.enum(INSTALL_EVENTS),
+  version: z.string().trim().max(40).default(""),
+});
+export type InstallPing = z.infer<typeof installPingSchema>;

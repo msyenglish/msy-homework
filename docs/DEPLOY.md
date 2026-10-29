@@ -196,6 +196,17 @@ Nếu token thiếu quyền Zone, `wrangler deploy` báo lỗi ở bước gắn
 
 `git pull && pnpm install && pnpm deploy:prod` — migration mới tự áp.
 
+## Đếm số bản cài
+
+Sau khi deploy, `cf:setup` gửi `{url, event: "install" | "update", version}` tới
+`https://free.msyen.com/api/v1/installs/ping`; cron của Worker gửi lại `event: "daily"` mỗi ngày một lần.
+Không gửi gì khác. Tắt: `pnpm cf:setup --update --no-telemetry` (ghi `TELEMETRY=off` vào `.deploy.env` và
+biến `TELEMETRY = "off"` của Worker).
+
+Phía nhận chỉ chạy khi `PUBLIC_BASE_URL` là `https://free.msyen.com` (`apps/api/src/lib/installPing.ts`):
+kiểm tra `<url>/api/v1/health` trả `ok`, ghi bảng `installs` trong D1, báo cài mới / cập nhật qua Telegram
+đã cấu hình ở **Cài đặt → Telegram** (cần bật công tắc). Danh sách bản cài nằm ngay dưới phần Telegram đó.
+
 ## Lưu ý
 
 - `pnpm -r typecheck` xanh **chưa chắc** build xanh; script deploy luôn build.

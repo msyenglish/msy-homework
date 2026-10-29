@@ -1130,6 +1130,17 @@ export const settings = sqliteTable("settings", {
   value: text("value"),
 });
 
+// Installs that report to the project site (only filled on the hub, see lib/installPing.ts).
+export const installs = sqliteTable("installs", {
+  url: text("url").primaryKey(),
+  version: text("version").notNull().default(""),
+  lastEvent: text("last_event").notNull(),
+  pings: integer("pings").notNull().default(0),
+  firstSeenAt: text("first_seen_at").notNull().default(nowSql),
+  lastSeenAt: text("last_seen_at").notNull().default(nowSql),
+  lastUpdateAt: text("last_update_at"),
+});
+
 // Hàng chờ tạo bài bằng AI (xử lý bất đồng bộ qua Cloudflare Queues).
 export const genJobs = sqliteTable("gen_jobs", {
   id: text("id").primaryKey().$defaultFn(uuid),

@@ -27,6 +27,8 @@ export type Bindings = {
   KEY_ENCRYPTION_SECRET?: string;
   CRON_SECRET?: string; // secret: bảo vệ endpoint /api/v1/cron/*
   MEDIA_BACKFILL?: string; // "off" skips the hourly exercise-audio backfill cron
+  APP_VERSION?: string; // version label sent with the install ping (filled in by cf:setup)
+  TELEMETRY?: string; // "off" stops the daily install ping (lib/installPing.ts)
   DEV_QUICK_LOGIN?: string; // "1" (in .dev.vars only) enables /dev/quick-login for loopback clients
   // ---- Cổng AI đa provider ----
   // Mỗi provider: <P>_API_KEYS = nhiều key phẩy ngăn cách (xoay vòng + fallback),

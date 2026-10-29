@@ -1,5 +1,18 @@
 # Cài MSY Homework từ đầu
 
+> [!IMPORTANT]
+> **Đây là mã nguồn website, không phải một tài khoản.** Bạn cài app lên tài khoản Cloudflare của chính
+> bạn và tự làm chủ toàn bộ: trang web, dữ liệu, học viên, tên miền đều là của bạn. App không phụ thuộc
+> vào ai, cũng không phải tài khoản admin hay giáo viên do người khác cấp — không ai khác vào được app của
+> bạn.
+>
+> Bạn hoàn toàn được tự sửa, thêm bớt tính năng, nâng cấp, hoặc fork mã nguồn thành phiên bản riêng.
+>
+> Để đếm số bản cài, app gửi **duy nhất địa chỉ trang web** của bạn (kèm số phiên bản) về
+> `free.msyen.com` khi cài, khi cập nhật và mỗi ngày một lần — không gửi tài khoản, học viên hay bài làm.
+> Không muốn gửi: thêm `--no-telemetry` vào cuối lệnh cài, hoặc chạy `pnpm cf:setup --update --no-telemetry`
+> sau khi cài.
+
 Trang này dành cho giáo viên muốn có trang web bài tập của riêng mình. Bạn không cần biết lập trình,
 không cần thuê máy chủ. App chạy trên Cloudflare, gói miễn phí đủ cho một lớp học nhỏ.
 
@@ -52,8 +65,18 @@ Token là "chìa khoá" cho phép script cài đặt thay bạn. Có hai cách �
 
 ![Chọn Full account and zone access rồi bấm Review token](guide/images/cf-token-full-access.jpg)
 
+> [!WARNING]
+> **Chỉ cần chép đúng một dòng: dòng token** (thường bắt đầu bằng `cfat_` — đó là bình thường). Trang kết
+> quả của Cloudflare có thể hiện thêm *Access Key ID*, *Secret Access Key*, *S3 endpoint* hay **Account
+> ID** — **đừng chép những dòng đó**, app không dùng (script tự tìm Account ID).
+
 Token quyền đầy đủ làm được mọi việc trên tài khoản Cloudflare (kể cả gắn tên miền riêng), nên **giữ kín như
 mật khẩu** và đừng gửi cho ai ngoài máy bạn cài.
+
+Hai mục dưới đây là **hướng dẫn phụ** — người mới bỏ qua, đi thẳng tới Bước 4.
+
+<details>
+<summary>Cách chọn quyền tối thiểu (tuỳ chọn)</summary>
 
 ### Cách chọn quyền tối thiểu (tuỳ chọn)
 
@@ -69,14 +92,13 @@ ba ô chọn, bấm **+ Add more** để thêm dòng:
 | **Account** | **Queues** | **Edit** |
 | **Account** | **Account Settings** | **Read** |
 
-Ở mục **Account Resources**, chọn **Include** → tên tài khoản của bạn, rồi tạo token và chép như trên.
+Ở mục **Account Resources**, chọn **Include** → tên tài khoản của bạn, rồi tạo token và chép như trên —
+vẫn **chỉ chép dòng token**, giữ kín như mật khẩu.
 
-Lưu ý:
+</details>
 
-- **Chỉ cần dòng token.** Nếu Cloudflare hiện thêm *Access Key ID*, *Secret Access Key* hay *S3
-  endpoint*, đừng chép — app không dùng. Bạn cũng không cần chép **Account ID**, script tự tìm.
-- Token có thể bắt đầu bằng `cfat_` — đó là bình thường.
-- Giữ token kín như mật khẩu.
+<details>
+<summary>Nếu muốn dùng tên miền riêng (tuỳ chọn)</summary>
 
 ### Nếu muốn dùng tên miền riêng
 
@@ -90,6 +112,8 @@ Token **quyền đầy đủ** đã đủ quyền; nếu dùng cách quyền t�
 | **Zone** | **Workers Routes** | **Edit** |
 
 và ở mục **Zone Resources**, chọn **Include** → **Specific zone** → tên miền của bạn.
+
+</details>
 
 ## Bước 4 — Chạy lệnh cài đặt
 

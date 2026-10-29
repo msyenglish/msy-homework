@@ -102,6 +102,10 @@ ALLOWED_ORIGINS = "http://localhost:5173"
 PUBLIC_BASE_URL = "http://localhost:8787"
 # "off" disables the hourly cron that regenerates missing exercise audio.
 MEDIA_BACKFILL = "on"
+# Version label sent with the install ping; cf:setup fills it in.
+APP_VERSION = "dev"
+# "off" stops the daily install ping to the project site (cf:setup --no-telemetry sets it).
+TELEMETRY = "on"
 # Sender for password-reset email (domain verified at Resend). Key = secret RESEND_API_KEY.
 EMAIL_FROM = "Homework <no-reply@example.com>"
 

@@ -72,12 +72,22 @@ export default function SetupGuidePage() {
     return () => io.disconnect();
   }, []);
   // Old links carry Vietnamese anchors with diacritics → jump to the matching heading and tidy the URL.
+  // A heading inside a collapsed <details> opens it first.
   useEffect(() => {
-    const { hash } = window.location;
-    const id = anchor(hash);
-    if (!id || id === hash) return;
-    document.getElementById(id.slice(1))?.scrollIntoView({ block: "start" });
-    history.replaceState(null, "", id);
+    const go = () => {
+      const { hash } = window.location;
+      const id = anchor(hash);
+      if (!id) return;
+      const el = document.getElementById(id.slice(1));
+      const box = el?.closest("details");
+      if (box && !box.open) box.open = true;
+      else if (id === hash) return;
+      el?.scrollIntoView({ block: "start" });
+      if (id !== hash) history.replaceState(null, "", id);
+    };
+    go();
+    window.addEventListener("hashchange", go);
+    return () => window.removeEventListener("hashchange", go);
   }, []);
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
